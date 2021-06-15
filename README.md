@@ -4,7 +4,7 @@ Hardware implementation of the Grain_128AEAD stream cipher
 
 ## Status
 Just started. Not completed. Does not work.
-*Do. Not. Use.*
+**Do. Not. Use.**
 
 
 ## Introduction
