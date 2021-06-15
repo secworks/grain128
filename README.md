@@ -17,6 +17,7 @@ hardware and is quite different in comparison to other finalists.
 
 
 ## Implementation notes
+The core has been developed using the [Grain_128AEAD C reference implementation](https://github.com/Noxet/Grain-128AEAD).
 
 
 ## Implementation results
