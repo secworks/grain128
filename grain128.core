@@ -1,0 +1,44 @@
+CAPI=2:
+
+name : secworks:crypto:grain128:0
+
+filesets:
+  rtl:
+    files:
+      - src/rtl/grain128.v
+      - src/rtl/grain128_core.v
+    file_type : verilogSource
+
+  tb:
+    files:
+      - src/tb/tb_grain128.v
+      - src/tb/tb_grain128_core.v
+    file_type : verilogSource
+
+  openlane: {files : [data/sky130.tcl : {file_type : tclSource}]}
+
+targets:
+  default:
+    filesets: [rtl]
+
+  lint:
+    default_tool : verilator
+    filesets : [rtl]
+    tools:
+      verilator:
+        mode : lint-only
+    toplevel : grain128
+
+  sky130:
+    default_tool: openlane
+    filesets: [rtl, openlane]
+    toplevel: grain128
+
+  tb_grain128: &tb
+    default_tool: icarus
+    filesets: [rtl, tb]
+    toplevel : tb_grain128
+
+  tb_grain128_core:
+    <<: *tb
+    toplevel : tb_grain128_core
