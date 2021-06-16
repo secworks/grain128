@@ -92,6 +92,8 @@ module grain128(
   reg next_reg;
   reg next_new;
 
+  reg [127 : 0] key_reg;
+
 
   //----------------------------------------------------------------
   // Wires.
@@ -110,7 +112,12 @@ module grain128(
   //----------------------------------------------------------------
   grain128_core core(
                      .clk(clk),
-                     .reset_n(reset_n)
+                     .reset_n(reset_n),
+
+                     .init(init_reg),
+                     .next(init_reg),
+
+                     .key(key_reg)
                     );
 
 

@@ -39,19 +39,35 @@
 `default_nettype none
 
 module grain128_core(
-                     input wire clk,
-                     input wire reset_n
+                     input wire           clk,
+                     input wire           reset_n,
+
+                     input wire           init,
+                     input wire           next,
+
+                     input wire [127 : 0] key
                     );
 
 
   //----------------------------------------------------------------
   // Internal constant and parameter definitions.
   //----------------------------------------------------------------
+  localparam CTRL_IDLE = 3'h0;
 
 
   //----------------------------------------------------------------
   // Registers including update variables and write enable.
   //----------------------------------------------------------------
+  reg [127 : 0] lfsr_reg;
+  reg [127 : 0] lfsr_new;
+  reg           lfsr_init;
+  reg           lfsr_load;
+  reg           lfsr_next;
+  reg           lfsr_we;
+
+  reg [2 : 0]   core_ctrl_reg;
+  reg [2 : 0]   core_ctrl_new;
+  reg           core_ctrl_we;
 
 
   //----------------------------------------------------------------
@@ -79,13 +95,59 @@ module grain128_core(
   always @ (posedge clk)
     begin: reg_update
       if (!reset_n) begin
-
+        lfsr_reg      <= 128'h0;
+        core_ctrl_reg <= CTRL_IDLE;
       end
 
       else begin
+        if (lfsr_we)
+          lfsr_reg <= lfsr_new;
 
+        if (core_ctrl_we)
+          core_ctrl_reg <= core_ctrl_new;
       end
     end // reg_update
+
+
+  //----------------------------------------------------------------
+  // lfsr_update
+  // Update logic for the LFSR.
+  //----------------------------------------------------------------
+  always @*
+    begin : lfsr_update
+      reg s127_new;
+
+      lfsr_new = 128'h0;
+      lfsr_we  = 1'h0;
+
+      s127_new = lfsr_reg[000] ^ lfsr_reg[007] ^ lfsr_reg[038] ^
+                 lfsr_reg[070] ^ lfsr_reg[081] ^ lfsr_reg[096];
+
+      if (lfsr_next) begin
+        lfsr_new = {s127_new, lfsr_reg[127 : 1]};
+        lfsr_we  = 1'h1;
+      end
+    end
+
+
+  //----------------------------------------------------------------
+  // core_ctrl
+  //----------------------------------------------------------------
+  always @*
+    begin : core_ctrl
+      lfsr_init = 1'h0;
+      lfsr_load = 1'h0;
+      lfsr_next = 1'h0;
+
+      case (core_ctrl_reg)
+        CTRL_IDLE : begin
+
+        end
+
+        default : begin
+        end
+      endcase // case (core_ctrl_reg)
+    end
 
 endmodule // grain128_core
 
