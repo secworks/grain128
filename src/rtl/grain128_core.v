@@ -45,7 +45,8 @@ module grain128_core(
                      input wire           init,
                      input wire           next,
 
-                     input wire [127 : 0] key
+                     input wire [127 : 0] key,
+                     input wire [095 : 0] iv
                     );
 
 
@@ -64,6 +65,13 @@ module grain128_core(
   reg           lfsr_load;
   reg           lfsr_next;
   reg           lfsr_we;
+
+  reg [127 : 0] nfsr_reg;
+  reg [127 : 0] nfsr_new;
+  reg           nfsr_init;
+  reg           nfsr_load;
+  reg           nfsr_next;
+  reg           nfsr_we;
 
   reg [2 : 0]   core_ctrl_reg;
   reg [2 : 0]   core_ctrl_new;
@@ -103,6 +111,9 @@ module grain128_core(
         if (lfsr_we)
           lfsr_reg <= lfsr_new;
 
+        if (nfsr_we)
+          nfsr_reg <= nfsr_new;
+
         if (core_ctrl_we)
           core_ctrl_reg <= core_ctrl_new;
       end
@@ -131,6 +142,33 @@ module grain128_core(
 
 
   //----------------------------------------------------------------
+  // nfsr_update
+  // Update logic for the NFSR.
+  //----------------------------------------------------------------
+  always @*
+    begin : nfsr_update
+      reg s127_new;
+
+      nfsr_new = 128'h0;
+      nfsr_we  = 1'h0;
+
+      s127_new = nfsr_reg[96]  ^ nfsr_reg[91]  ^ nfsr_reg[56]  ^ nfsr_reg[26] ^
+                 nfsr_reg[0]   ^ (nfsr_reg[84] & nfsr_reg[68]) ^
+                 (nfsr_reg[67] & nfsr_reg[3])  ^ (nfsr_reg[65] & nfsr_reg[61]) ^
+                 (nfsr_reg[59] & nfsr_reg[27]) ^ (nfsr_reg[48] & nfsr_reg[40]) ^
+                 (nfsr_reg[18] & nfsr_reg[17]) ^ (nfsr_reg[13] & nfsr_reg[11]) ^
+		 (nfsr_reg[82] & nfsr_reg[78]  & nfsr_reg[70]) ^
+                 (nfsr_reg[25] & nfsr_reg[24]  & nfsr_reg[22]) ^
+		 (nfsr_reg[95] & nfsr_reg[93]  & nfsr_reg[92]  & nfsr_reg[88]);
+
+      if (nfsr_next) begin
+        nfsr_new = {s127_new, nfsr_reg[127 : 1]};
+        nfsr_we  = 1'h1;
+      end
+    end
+
+
+  //----------------------------------------------------------------
   // core_ctrl
   //----------------------------------------------------------------
   always @*
@@ -138,6 +176,10 @@ module grain128_core(
       lfsr_init = 1'h0;
       lfsr_load = 1'h0;
       lfsr_next = 1'h0;
+
+      nfsr_init = 1'h0;
+      nfsr_load = 1'h0;
+      nfsr_next = 1'h0;
 
       case (core_ctrl_reg)
         CTRL_IDLE : begin

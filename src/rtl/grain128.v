@@ -93,6 +93,12 @@ module grain128(
   reg next_new;
 
   reg [127 : 0] key_reg;
+  reg [127 : 0] key_new;
+  reg           key_we;
+
+  reg [095 : 0] iv_reg;
+  reg [095 : 0] iv_new;
+  reg           iv_we;
 
 
   //----------------------------------------------------------------
@@ -117,7 +123,8 @@ module grain128(
                      .init(init_reg),
                      .next(init_reg),
 
-                     .key(key_reg)
+                     .key(key_reg),
+                     .iv(iv_reg)
                     );
 
 
@@ -131,13 +138,21 @@ module grain128(
     begin : reg_update
       integer i;
       if (!reset_n) begin
-        init_reg   <= 1'h0;
-        next_reg   <= 1'h0;
+        init_reg <= 1'h0;
+        next_reg <= 1'h0;
+        key_reg  <= 128'h0;
+        iv_reg   <= 96'h0;
       end
 
       else begin
         init_reg <= init_new;
         next_reg <= next_new;
+
+        if (key_we)
+          key_reg <= key_new;
+
+        if (iv_we)
+          iv_reg  <= iv_new;
       end
     end // reg_update
 
@@ -151,6 +166,8 @@ module grain128(
     begin : api
       init_new      = 1'h0;
       next_new      = 1'h0;
+      key_we        = 1'h0;
+      iv_we          = 1'h0;
       tmp_read_data = 32'h0;
 
       if (cs)
