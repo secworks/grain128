@@ -117,20 +117,21 @@ module grain128(
   //----------------------------------------------------------------
   // reg_update
   // Update functionality for all registers in the core.
-  // All registers are positive edge triggered with asynchronous
+  // All registers are positive edge triggered with synchronous
   // active low reset.
   //----------------------------------------------------------------
-  always @ (posedge clk or negedge reset_n)
+  always @ (posedge clk)
     begin : reg_update
       integer i;
-          init_reg   <= 1'h0;
-          next_reg   <= 1'h0;
-        end
-      else
-        begin
-          init_reg <= init_new;
-          next_reg <= next_new;
-        end
+      if (!reset_n) begin
+        init_reg   <= 1'h0;
+        next_reg   <= 1'h0;
+      end
+
+      else begin
+        init_reg <= init_new;
+        next_reg <= next_new;
+      end
     end // reg_update
 
 

@@ -39,19 +39,14 @@
 `default_nettype none
 
 module grain128_core(
-                     input wire           clk,
-                     input wire           reset_n
+                     input wire clk,
+                     input wire reset_n
                     );
 
 
   //----------------------------------------------------------------
   // Internal constant and parameter definitions.
   //----------------------------------------------------------------
-  localparam CTRL_IDLE   = 3'h0;
-  localparam CTRL_PIPE0  = 3'h1;
-  localparam CTRL_PIPE1  = 3'h2;
-  localparam CTRL_PIPE2  = 3'h3;
-  localparam CTRL_UPDATE = 3'h4;
 
 
   //----------------------------------------------------------------
@@ -78,17 +73,18 @@ module grain128_core(
   // reg_update
   //
   // Update functionality for all registers in the core.
-  // All registers are positive edge triggered with asynchronous
+  // All registers are positive edge triggered with synchronous
   // active low reset.
   //----------------------------------------------------------------
-  always @ (posedge clk or negedge reset_n)
+  always @ (posedge clk)
     begin: reg_update
-      if (!reset_n)
-        begin
-        end
-      else
-        begin
-        end
+      if (!reset_n) begin
+
+      end
+
+      else begin
+
+      end
     end // reg_update
 
 endmodule // grain128_core
