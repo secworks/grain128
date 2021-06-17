@@ -46,7 +46,9 @@ module grain128_core(
                      input wire           next,
 
                      input wire [127 : 0] key,
-                     input wire [095 : 0] iv
+                     input wire [095 : 0] iv,
+
+                     output wire [7 : 0]  keystream
                     );
 
 
