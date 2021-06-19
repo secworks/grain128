@@ -61,23 +61,23 @@ module grain128_core(
   //----------------------------------------------------------------
   // Registers including update variables and write enable.
   //----------------------------------------------------------------
-  reg [127 : 0] lfsr_reg;
-  reg [127 : 0] lfsr_new;
-  reg           lfsr_init;
-  reg           lfsr_load;
-  reg           lfsr_next;
-  reg           lfsr_we;
+  reg [7 : 0] lfsr_reg [0 : 127];
+  reg [7 : 0] lfsr_new [0 : 127];
+  reg         lfsr_init;
+  reg         lfsr_load;
+  reg         lfsr_next;
+  reg         lfsr_we;
 
-  reg [127 : 0] nfsr_reg;
-  reg [127 : 0] nfsr_new;
-  reg           nfsr_init;
-  reg           nfsr_load;
-  reg           nfsr_next;
-  reg           nfsr_we;
+  reg [7 : 0] nfsr_reg [0 : 127];
+  reg [7 : 0] nfsr_new [0 : 127];
+  reg         nfsr_init;
+  reg         nfsr_load;
+  reg         nfsr_next;
+  reg         nfsr_we;
 
-  reg [2 : 0]   core_ctrl_reg;
-  reg [2 : 0]   core_ctrl_new;
-  reg           core_ctrl_we;
+  reg [2 : 0] core_ctrl_reg;
+  reg [2 : 0] core_ctrl_new;
+  reg         core_ctrl_we;
 
 
   //----------------------------------------------------------------
@@ -104,17 +104,25 @@ module grain128_core(
   //----------------------------------------------------------------
   always @ (posedge clk)
     begin: reg_update
+      integer i;
+
       if (!reset_n) begin
-        lfsr_reg      <= 128'h0;
+        for (i = 0; i < 128; i = i + 1) begin
+          lfsr_reg[i]  <= 8'h0;
+          nfsr_reg[i]  <= 8'h0;
+        end
+
         core_ctrl_reg <= CTRL_IDLE;
       end
 
       else begin
         if (lfsr_we)
-          lfsr_reg <= lfsr_new;
+          for (i = 0 ; i < 128 ; i = i + 1)
+            lfsr_reg[i] <= lfsr_new[i];
 
         if (nfsr_we)
-          nfsr_reg <= nfsr_new;
+          for (i = 0 ; i < 128 ; i = i + 1)
+            nfsr_reg[i] <= nfsr_new[i];
 
         if (core_ctrl_we)
           core_ctrl_reg <= core_ctrl_new;
@@ -128,17 +136,26 @@ module grain128_core(
   //----------------------------------------------------------------
   always @*
     begin : lfsr_update
-      reg s127_new;
+      integer i;
+      reg [7 : 0] s127_new;
 
-      lfsr_new = 128'h0;
+      for (i = 0; i < 128; i = i + 1) begin
+        lfsr_reg[i]  <= 8'h0;
+      end
+
       lfsr_we  = 1'h0;
+
 
       s127_new = lfsr_reg[000] ^ lfsr_reg[007] ^ lfsr_reg[038] ^
                  lfsr_reg[070] ^ lfsr_reg[081] ^ lfsr_reg[096];
 
+
       if (lfsr_next) begin
-        lfsr_new = {s127_new, lfsr_reg[127 : 1]};
-        lfsr_we  = 1'h1;
+        lfsr_new[127]     = s127_new;
+
+        for (i = 0 ; i < 127 ; i = i + 1)
+          lfsr_new[i] = lfsr_reg[(i + 1)];
+        lfsr_we       = 1'h1;
       end
     end
 
@@ -149,10 +166,15 @@ module grain128_core(
   //----------------------------------------------------------------
   always @*
     begin : nfsr_update
-      reg s127_new;
+      integer     i;
+      reg [7 : 0] s127_new;
 
-      nfsr_new = 128'h0;
+      for (i = 0; i < 128; i = i + 1) begin
+        nfsr_reg[i] <= 8'h0;
+      end
+
       nfsr_we  = 1'h0;
+
 
       s127_new = nfsr_reg[96]  ^ nfsr_reg[91]  ^ nfsr_reg[56]  ^ nfsr_reg[26] ^
                  nfsr_reg[0]   ^ (nfsr_reg[84] & nfsr_reg[68]) ^
@@ -163,9 +185,12 @@ module grain128_core(
                  (nfsr_reg[25] & nfsr_reg[24]  & nfsr_reg[22]) ^
 		 (nfsr_reg[95] & nfsr_reg[93]  & nfsr_reg[92]  & nfsr_reg[88]);
 
+
       if (nfsr_next) begin
-        nfsr_new = {s127_new, nfsr_reg[127 : 1]};
-        nfsr_we  = 1'h1;
+        nfsr_new[127]     = s127_new;
+        for (i = 0 ; i < 127 ; i = i + 1)
+          nfsr_new[i] = nfsr_reg[(i + 1)];
+        nfsr_we      = 1'h1;
       end
     end
 
