@@ -151,7 +151,7 @@ module grain128_core(
 
 
       if (lfsr_next) begin
-        lfsr_new[127 = s127_new;
+        lfsr_new[127] = s127_new;
 
         for (i = 0 ; i < 127 ; i = i + 1)
           lfsr_new[i] = lfsr_reg[(i + 1)];
