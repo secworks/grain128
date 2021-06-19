@@ -140,7 +140,7 @@ module grain128_core(
       reg [7 : 0] s127_new;
 
       for (i = 0; i < 128; i = i + 1) begin
-        lfsr_reg[i]  <= 8'h0;
+        lfsr_reg[i] = 8'h0;
       end
 
       lfsr_we  = 1'h0;
@@ -151,7 +151,7 @@ module grain128_core(
 
 
       if (lfsr_next) begin
-        lfsr_new[127]     = s127_new;
+        lfsr_new[127 = s127_new;
 
         for (i = 0 ; i < 127 ; i = i + 1)
           lfsr_new[i] = lfsr_reg[(i + 1)];
@@ -170,7 +170,7 @@ module grain128_core(
       reg [7 : 0] s127_new;
 
       for (i = 0; i < 128; i = i + 1) begin
-        nfsr_reg[i] <= 8'h0;
+        nfsr_reg[i] = 8'h0;
       end
 
       nfsr_we  = 1'h0;
@@ -187,10 +187,10 @@ module grain128_core(
 
 
       if (nfsr_next) begin
-        nfsr_new[127]     = s127_new;
+        nfsr_new[127] = s127_new;
         for (i = 0 ; i < 127 ; i = i + 1)
           nfsr_new[i] = nfsr_reg[(i + 1)];
-        nfsr_we      = 1'h1;
+        nfsr_we       = 1'h1;
       end
     end
 
